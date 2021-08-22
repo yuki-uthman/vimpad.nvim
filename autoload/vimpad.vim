@@ -153,11 +153,18 @@ function! s:on() abort "{{{
 
 "  call Decho(string(lines))
 
-  silent source %
+  try
+    silent source %
+  catch /.*/
+  endtry
 
   " execute the line and add output
   for line in lines
-    let output = nvim_exec(line.text, 1)
+    try
+      let output = nvim_exec(line.text, 1)
+    catch /.*/
+      let output = v:exception
+    endtry
     let line.output = output
   endfor
 
