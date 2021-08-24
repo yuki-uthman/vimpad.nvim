@@ -1,5 +1,4 @@
 
-
 function! vimpad#toggle() abort
   if g:vimpad.id > 0
     call s:off()
@@ -24,6 +23,11 @@ function! vimpad#refresh() abort
     call s:on()
   endif
 endfunction
+
+let s:output_hl = 'VimpadOutput'
+let s:prefix_hl = 'VimpadPrefix'
+let s:suffix_hl = 'VimpadSuffix'
+
 
 function! s:get_visual_selection() "{{{
     let [line_start, column_start] = getpos("'<")[1:2]
@@ -69,63 +73,90 @@ function! s:getline_as_dict(start, end) "{{{
   return lists
 endfunction "}}}
 
-function! s:build_output(output) "{{{
+function! s:add_padding(string, padding) "{{{
+  return a:padding..a:string..a:padding
+endfunction "}}}
 
-  exec 'highlight vimpadOuput    guifg='..g:vimpad.fg_color 'guibg='..g:vimpad.bg_color
+function! s:is_in(value, list) "{{{
+  return index(a:list, a:value) >= 0
+endfunction "}}}
 
-  let bg_color = synIDattr(hlID("Normal"), "bg")
-  exec 'highlight vimpadSurround guifg='..g:vimpad.bg_color 'guibg='..bg_color
+function! s:lsp_ouput(line) "{{{
+
+  let hl = s:output_hl
+  let prefix_hl = s:prefix_hl
+  let prefix = 'prefix'
+
+  if a:line.error
+    let hl .= 'Error'
+    let prefix_hl .= 'Error'
+    let prefix .= '_error'
+  endif
+
+  let output = g:vimpad[prefix].' '.a:line.output 
+
+  if g:vimpad.padding_count
+    let output = s:add_padding(output, repeat(' ', g:vimpad.padding_count))
+  else
+    let output = a:line.output
+  endif
+
+  return [
+        \[output, hl]
+        \]
+endfunction "}}}
+
+function! s:custom_output(line) "{{{
+
+  let hl = s:output_hl
+  let prefix_hl = s:prefix_hl
+  let suffix_hl = s:suffix_hl
+
+  let prefix = 'prefix'
+  let suffix = 'suffix'
+
+  if a:line.error
+    let hl .= 'Error'
+    let prefix_hl .= 'Error'
+    let suffix_hl .= 'Error'
+
+    let prefix .= '_error'
+    let suffix .= '_error'
+
+  endif
+
+  if g:vimpad.padding_count
+    let output = s:add_padding(a:line.output, repeat(' ', g:vimpad.padding_count))
+  else
+    let output = a:line.output
+  endif
+
+  return [ 
+        \[g:vimpad[prefix], prefix_hl], 
+        \[output, hl], 
+        \[g:vimpad[suffix], suffix_hl]
+        \]
+
+endfunction "}}}
 
 
-  exec 'highlight vimpadSurroundReverse guifg='..bg_color 'guibg='..g:vimpad.bg_color
+function! s:build_output(line) "{{{
+
+  let style = g:vimpad.style
+
+  if a:line.error
+    let style = g:vimpad.style_error
+  endif
+
+  " call Decho(style)
 
   let output = []
 
-  if g:vimpad.style ==# 'none'
-    let output = [
-          \[' '..a:output..' ', 'vimpadOuput'],
-          \]
-  elseif g:vimpad.style ==# 'round'
-    let output = [
-          \["\uE0B6", 'vimpadSurround'], 
-          \[' '..a:output..' ', 'vimpadOuput'],
-          \["\uE0B4", 'vimpadSurround'], 
-          \]
+  if style ==# 'lsp'
+    let output = s:lsp_ouput(a:line)
 
-  elseif g:vimpad.style ==# 'triangle-right'
-    let output = [
-          \["\uE0B0", 'vimpadSurroundReverse'], 
-          \[' '..a:output..' ', 'vimpadOuput'],
-          \["\uE0B0", 'vimpadSurround'], 
-          \]
-
-
-  elseif g:vimpad.style ==# 'triangle-left'
-    let output = [
-          \["\uE0B2", 'vimpadSurround'], 
-          \[' '..a:output..' ', 'vimpadOuput'],
-          \["\uE0B2", 'vimpadSurroundReverse'], 
-          \]
-
-  elseif g:vimpad.style ==# 'fire'
-    let output = [
-          \["\uE0C2", 'vimpadSurround'], 
-          \[' '..a:output, 'vimpadOuput'],
-          \["\uE0C0", 'vimpadSurround'], 
-          \]
-
-  elseif g:vimpad.style ==# 'custom'
-    let output = [
-          \[a:output, g:vimpad.output_hl],
-          \]
-
-    if s:conig.prefix != ''
-      call insert(output, [g:vimpad.prefix, g:vimpad.prefix_hl])
-    endif
-
-    if s:conig.suffix != ''
-      call insert(output, [g:vimpad.suffix, g:vimpad.suffix_hl], -1)
-    endif
+  elseif style ==# 'custom'
+    let output = s:custom_output(a:line)
 
   endif
 
@@ -147,12 +178,9 @@ function! s:on() abort "{{{
 
   let lines = s:getline_as_dict(1, '$')
 
-"  call Decho(string(lines))
-
   call filter(lines, function('s:to_execute'))
 
-"  call Decho(string(lines))
-
+  " let the exception go through
   try
     silent source %
   catch /.*/
@@ -162,10 +190,14 @@ function! s:on() abort "{{{
   for line in lines
     try
       let output = nvim_exec(line.text, 1)
+      let error = 0
     catch /.*/
+      " store the exception msg
       let output = v:exception
+      let error = 1
     endtry
     let line.output = output
+    let line.error = error
   endfor
 
 "  call Decho(string(lines))
@@ -174,14 +206,14 @@ function! s:on() abort "{{{
 
   let bufnr = 0
   for line in lines
-    let output = s:build_output(line.output)
-    call nvim_buf_set_virtual_text(bufnr, g:vimpad.id, line.lnum, 
+    let output = s:build_output(line)
+    call nvim_buf_set_virtual_text(
+          \bufnr, 
+          \g:vimpad.id, 
+          \line.lnum, 
           \output,
           \{})
   endfor
-
-  " echom output
-"  call Decho('')
 
 endfunction "}}}
 
