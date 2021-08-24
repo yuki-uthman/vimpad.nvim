@@ -97,8 +97,6 @@ function! s:lsp_ouput(line) "{{{
 
   if g:vimpad.padding_count
     let output = s:add_padding(output, repeat(' ', g:vimpad.padding_count))
-  else
-    let output = a:line.output
   endif
 
   return [
@@ -148,8 +146,6 @@ function! s:build_output(line) "{{{
     let style = g:vimpad.style_error
   endif
 
-  " call Decho(style)
-
   let output = []
 
   if style ==# 'lsp'
@@ -182,7 +178,7 @@ function! s:on() abort "{{{
 
   " let the exception go through
   try
-    silent source %
+    silent! source %
   catch /.*/
   endtry
 
