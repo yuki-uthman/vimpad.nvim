@@ -137,7 +137,6 @@ function! s:custom_output(line) "{{{
 
 endfunction "}}}
 
-
 function! s:build_output(line) "{{{
 
   let style = g:vimpad.style
@@ -176,15 +175,12 @@ function! s:on() abort "{{{
 
   call filter(lines, function('s:to_execute'))
 
-  " let the exception go through
-  try
-    silent! source %
-  catch /.*/
-  endtry
-
   " execute the line and add output
   for line in lines
     try
+      " only source until the current line
+      " before capturing the output
+      exec 'silent 1,' line.lnum 'source'
       let output = nvim_exec(line.text, 1)
       let error = 0
     catch /.*/
@@ -192,11 +188,13 @@ function! s:on() abort "{{{
       let output = v:exception
       let error = 1
     endtry
+
     let line.output = output
     let line.error = error
   endfor
 
-"  call Decho(string(lines))
+  " remove lines if output is empty string
+  call filter(lines, 'v:val.output != ""')
 
   let g:vimpad.id = nvim_create_namespace('vimpad')
 
