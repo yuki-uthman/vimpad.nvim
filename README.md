@@ -75,30 +75,44 @@ To add more spaces before output:
 ![space](space.png)
 
 
-Two main highlight groups are used(VimpadOutput and VimpadOutputError). To 
-change color you can link the vimpad highlight group to the existing highlight 
+Two main highlight groups are used, `VimpadOutput` and `VimpadOutputError`. To 
+change color you can link the vimpad highlight group to any existing highlight 
 group provided by your colorscheme or you can define the colors yourself:
 ```vimL
 " Linking to the existing group
 highlight link VimpadOutput      PmenuSel
-highlight link VimpadOutputError ErrorMsg
+highlight link VimpadOutputError Error
 
 " to see all the highlight groups
 :highlight
 
+```
+![linking](linking.png)
+
+If you want to add some padding around the output:
+```viml
+  " number of spaces around the output
+  let g:vimpad_add_padding = 1
+```
+![padding](padding.png)
+
+
+```vimL
 " Defining your own colors
 " for terminal
 " ctermfg as the font golor
 " ctermbg as the background color
-highlight VimpadOutput      ctermfg='cyan' ctermbg='bg'
-highlight VimpadOutputError ctermfg='red' ctermbg='bg'
+highlight VimpadOutput      ctermfg=LightCyan    ctermbg=DarkBlue
+highlight VimpadOutputError ctermfg=LightMagenta ctermbg=DarkMagenta
 
 " for gui
 " guifg as the font golor
 " guibg as the background color
-highlight VimpadOutput      guifg='White' guibg='Black'
-highlight VimpadOutputError guifg='White' guibg='Black'
+highlight VimpadOutput      guifg=LightCyan    guibg=DarkBlue
+highlight VimpadOutputError guifg=LightMagenta guibg=DarkMagenta
 ```
+![custom](custom.png)
+
 The following colors are available in most systems:
   - Black
   - Brown
@@ -119,7 +133,7 @@ h gui-colors
 
 To set the color using RGB:
 ```vimL
-:highlight flasherColor guifg=#11f0c3 guibg=#ff00ff
+highlight VimpadOutput guifg=#11f0c3 guibg=#ff00ff
 ```
 
 ## Powerline Style Output
@@ -129,19 +143,91 @@ powerline!
 
 For powerline looking output you have to tweak the highlight of the shapes on 
 the both side of the output. Depending on the shape you would have to reverse 
-its color. The Highlight groups being used for the shapes are named with prefix 
-and suffix respectively. The examples are shown below.
+its color. The highlight groups for the shapes are VimpadPrefix and VimpadSuffix 
+for the normal output and VimpadPrefixError and VimpadSuffixError for the error 
+  output. The examples are shown below.
 
-Round shape:
+### Round shape:
+```vimL
+" make sure to set the style to custom!
+let g:vimpad_style = 'custom'
+let g:vimpad_prefix = "\uE0B6"
+let g:vimpad_suffix= "\uE0B4"
+highlight VimpadOutput guifg=bg guibg=Cyan
+highlight VimpadPrefix guifg=bg guibg=Cyan gui=reverse
+highlight VimpadSuffix guifg=bg guibg=Cyan gui=reverse
+
+" make sure to set the style to custom!
+let g:vimpad_style_error = 'custom'
+let g:vimpad_prefix_error = "\uE0B6"
+let g:vimpad_suffix_error = "\uE0B4"
+highlight VimpadOutputError guifg=bg guibg=Red
+highlight VimpadPrefixError guifg=bg guibg=Red gui=reverse
+highlight VimpadSuffixError guifg=bg guibg=Red gui=reverse
+```
+![round](round.png)
+
+### Left arrow:
+```vimL
+" make sure to set the style to custom!
+let g:vimpad_style = 'custom'
+let g:vimpad_prefix = "\uE0B2"
+let g:vimpad_suffix= "\uE0B2"
+highlight VimpadOutput guifg=bg guibg=Cyan
+highlight VimpadPrefix guifg=bg guibg=Cyan gui=reverse
+highlight VimpadSuffix guifg=bg guibg=Cyan
+
+" make sure to set the style to custom!
+let g:vimpad_style_error = 'custom'
+let g:vimpad_prefix_error = "\uE0B2"
+let g:vimpad_suffix_error = "\uE0B2"
+highlight VimpadOutputError guifg=bg guibg=Red
+highlight VimpadPrefixError guifg=bg guibg=Red gui=reverse
+highlight VimpadSuffixError guifg=bg guibg=Red 
+```
+![left-arrow](left-arrow.png)
 
 
+### Right arrow:
+```vimL
+" make sure to set the style to custom!
+let g:vimpad_style = 'custom'
+let g:vimpad_prefix = "\uE0B0"
+let g:vimpad_suffix= "\uE0B0"
+highlight VimpadOutput guifg=bg guibg=Cyan
+highlight VimpadPrefix guifg=bg guibg=Cyan gui=reverse
+highlight VimpadSuffix guifg=bg guibg=Cyan
 
-Right arrow:
+" make sure to set the style to custom!
+let g:vimpad_style_error = 'custom'
+let g:vimpad_prefix_error = "\uE0B0"
+let g:vimpad_suffix_error = "\uE0B0"
+highlight VimpadOutputError guifg=bg guibg=Red
+highlight VimpadPrefixError guifg=bg guibg=Red gui=reverse
+highlight VimpadSuffixError guifg=bg guibg=Red 
+```
+![right-arrow](right-arrow.png)
 
 
+### And finally Fireeeeeeeeeeeeee:
+```vimL
+" make sure to set the style to custom!
+let g:vimpad_style = 'custom'
+let g:vimpad_prefix = "\uE0C2"
+let g:vimpad_suffix= "\uE0C0"
+highlight VimpadOutput guifg=bg guibg=Yellow
+highlight VimpadPrefix guifg=bg guibg=Yellow gui=reverse
+highlight VimpadSuffix guifg=bg guibg=Yellow gui=reverse
 
-Left arrow:
+" make sure to set the style to custom!
+let g:vimpad_style_error = 'custom'
+let g:vimpad_prefix_error = "\uE0C2"
+let g:vimpad_suffix_error = "\uE0C0"
+highlight VimpadOutputError guifg=bg guibg=Red
+highlight VimpadPrefixError guifg=bg guibg=Red gui=reverse
+highlight VimpadSuffixError guifg=bg guibg=Red gui=reverse
+```
+![fire](fire.png)
 
-
-
-And finally Fireeeeeeeeeeeeee:
+see more symbols: <br>
+- [powerline-extra-symbols](https://github.com/ryanoasis/powerline-extra-symbols#glyphs)
