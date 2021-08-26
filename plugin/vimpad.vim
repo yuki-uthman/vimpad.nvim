@@ -70,10 +70,11 @@ endfunction "}}}
 let g:vimpad = s:init_vimpad()
 call s:setup_highlight()
 
-nnoremap <silent><Plug>(vimpad-toggle) :call vimpad#toggle()<CR>
-nnoremap <silent><Plug>(vimpad-on) :call vimpad#on()<CR>
-nnoremap <silent><Plug>(vimpad-off) :call vimpad#off()<CR>
+nnoremap <silent><Plug>(vimpad-toggle)  :call vimpad#toggle()<CR>
+nnoremap <silent><Plug>(vimpad-on)      :call vimpad#on()<CR>
+nnoremap <silent><Plug>(vimpad-off)     :call vimpad#off()<CR>
 nnoremap <silent><Plug>(vimpad-refresh) :call vimpad#refresh()<CR>
+vnoremap <silent><Plug>(vimpad-execute) :<C-U>call vimpad#execute()<CR>
 
 if exists('g:vimpad_refresh_on_save') && g:vimpad_refresh_on_save == 0
 

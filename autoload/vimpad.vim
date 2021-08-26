@@ -24,10 +24,13 @@ function! vimpad#refresh() abort
   endif
 endfunction
 
+function! vimpad#execute() abort
+  call s:execute()
+endfunction
+
 let s:output_hl = 'VimpadOutput'
 let s:prefix_hl = 'VimpadPrefix'
 let s:suffix_hl = 'VimpadSuffix'
-
 
 function! s:get_visual_selection() "{{{
     let [line_start, column_start] = getpos("'<")[1:2]
@@ -40,13 +43,13 @@ function! s:get_visual_selection() "{{{
     let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
     let lines[0] = lines[0][column_start - 1:]
 
-    return lines
-    " return join(lines, "\n")
+    " return lines
+    return join(lines, "\n")
 endfunction "}}}
 
 function! s:to_execute(index, value) "{{{
   " match a line if the line starts with echo/echom/call
-  let regex = '\V\^\(echo\|echom\|call\)'
+  let regex = '\V\^\(echo\|echom\|call\|throw\)'
 
   if a:value.text =~ regex
     return 1
@@ -219,6 +222,30 @@ function! s:on() abort "{{{
 
 endfunction "}}}
 
+function! s:execute() abort
+  let lines = s:get_visual_selection()
+  try
+    let output = nvim_exec(lines, 1)
 
+    let line = {}
+    let line.output = output
+    let line.error = 0
+    let output = s:build_output(line)
+
+    redraw
+    for list in output
+      if len(list) > 1
+        exec 'echohl' list[1]
+        echon list[0]
+        echohl NONE
+      endif
+    endfor
+
+  catch /.*/
+    echohl ErrorMsg
+    echom v:exception
+    echohl NONE
+  endtry
+endfunction
 
 " [TODO](2108210154)
