@@ -212,6 +212,8 @@ function! s:on() abort "{{{
   let bufnr = 0
   for line in lines
     let output = s:build_output(line)
+
+    " nvim_buf_set_virtual_text({buffer}, {src_id}, {line}, {chunks}, {opts})
     call nvim_buf_set_virtual_text(
           \bufnr, 
           \g:vimpad.id, 
@@ -224,28 +226,44 @@ endfunction "}}}
 
 function! s:execute() abort
   let lines = s:get_visual_selection()
+  let outputs = []
   try
     let output = nvim_exec(lines, 1)
+    let outputs = split(output, "\n")
+    let num = 0
+    let lines = []
+    for output in outputs
+      let line = {}
+      let line.num = num
+      let line.output = output
+      let line.error = 0
+      call add(lines, line)
+    endfor
 
+  catch /.*/
+    let lines = []
+    let num = 0
     let line = {}
-    let line.output = output
-    let line.error = 0
-    let output = s:build_output(line)
+    let line.num = num
+    let line.output = v:exception
+    let line.error = 1
+    call add(lines, line)
+  endtry
 
-    redraw
+  redraw
+  for line in lines
+    let output = s:build_output(line)
     for list in output
       if len(list) > 1
         exec 'echohl' list[1]
         echon list[0]
-        echohl NONE
       endif
     endfor
+    echo ""
+  endfor
 
-  catch /.*/
-    echohl ErrorMsg
-    echom v:exception
-    echohl NONE
-  endtry
+
+  echohl NONE
 endfunction
 
 " [TODO](2108210154)
