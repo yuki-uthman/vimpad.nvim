@@ -175,12 +175,16 @@ function! s:on() abort "{{{
 
   call filter(lines, function('s:to_execute'))
 
-  " execute the line and add output
+  let previous_line = 1
   for line in lines
     try
-      " only source until the current line
-      " before capturing the output
-      exec 'silent 1,' line.lnum 'source'
+      " only source until the current line from the previously executed line
+      " adding one to the line.lnum produces a cleaner error code for some reason
+      " although it would mean sourcing the current line twice
+      " here and also with nvim_exec
+      let source = 'silent ' . previous_line . ',' . (line.lnum + 1) . 'source'
+      exec source
+
       let output = nvim_exec(line.text, 1)
       let error = 0
     catch /.*/
@@ -191,9 +195,13 @@ function! s:on() abort "{{{
 
     let line.output = output
     let line.error = error
+
+    " increment by 2 because the buffer starts from 1
+    " while s:getline_as_dict() starts the line from 0
+    let previous_line = line.lnum + 2
   endfor
 
-  " remove lines if output is empty string
+  " removes lines if output is empty string
   call filter(lines, 'v:val.output != ""')
 
   let g:vimpad.id = nvim_create_namespace('vimpad')
