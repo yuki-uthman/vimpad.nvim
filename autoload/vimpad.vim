@@ -49,7 +49,7 @@ endfunction "}}}
 
 function! s:to_execute(index, value) "{{{
   " match a line if the line starts with echo/echom/call
-  let regex = '\V\^\(echo\|echom\|call\|throw\)'
+  let regex = '\V\^\(echo\|echom\|throw\)'
 
   if a:value.text =~ regex
     return 1
