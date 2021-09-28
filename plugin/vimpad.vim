@@ -70,21 +70,27 @@ endfunction "}}}
 let g:vimpad = s:init_vimpad()
 call s:setup_highlight()
 
+" refresh when the text is changed in the normal mode
+augroup vimpad_autocmd
+  au!
+  au TextChanged *.vim call vimpad#refresh()
+augroup END
+
+if exists('g:vimpad_refresh_on_save') && g:vimpad_refresh_on_save == 0
+else
+
+  " refresh when the file is saved
+  augroup vimpad_on_save
+      au!
+      au BufWritePost *.vim call vimpad#refresh()
+  augroup end
+endif
+
 nnoremap <silent><Plug>(vimpad-toggle)  :call vimpad#toggle()<CR>
 nnoremap <silent><Plug>(vimpad-on)      :call vimpad#on()<CR>
 nnoremap <silent><Plug>(vimpad-off)     :call vimpad#off()<CR>
 nnoremap <silent><Plug>(vimpad-refresh) :call vimpad#refresh()<CR>
 vnoremap <silent><Plug>(vimpad-execute) :<C-U>call vimpad#execute()<CR>
-
-if exists('g:vimpad_refresh_on_save') && g:vimpad_refresh_on_save == 0
-
-else
-  augroup vimpad
-      au!
-
-      au BufWritePost *.vim call vimpad#refresh()
-  augroup end
-endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
