@@ -1,4 +1,4 @@
-# nvim-vimpad
+# vimpad.nvim
 
 Like codi and luapad but for vimscript.
 
@@ -11,21 +11,21 @@ Makes use of the virtual text feature in neovim.
 
 * vim-plug
 ```viml
-Plug 'yuki-uthman/nvim-vimpad'
+Plug 'yuki-uthman/vimpad.nvim'
 ```
 
 * vundle
 ```viml
-Plugin 'yuki-uthman/nvim-vimpad'
+Plugin 'yuki-uthman/vimpad.nvim'
 ```
 
 * minpac:
 ```viml
-call minpac#add('yuki-uthman/nvim-vimpad')
+call minpac#add('yuki-uthman/vimpad.nvim')
 
 " for lazy loading
-call minpac#add('yuki-uthman/nvim-vimpad', { 'type': 'opt' })
-packadd nvim-vimpad
+call minpac#add('yuki-uthman/vimpad.nvim', { 'type': 'opt' })
+packadd vimpad.nvim
 ```
 
 
